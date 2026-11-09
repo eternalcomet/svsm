@@ -17,15 +17,21 @@ QEMU=/path/to/qemu scripts/launch_guest.sh --debugserial
 If you don't have access to confidential hardware (e.g., SEV-SNP), you can
 pass the ```--nocc``` option to the script.
 
-The GDB stub remains dormant until a CPU exception occurs, either through a
-kernel panic or via a debug breakpoint, at which time the GDB stub will await a
-serial port connection and display this message in the console:
+The GDB stub remains dormant until an explicit debug breakpoint occurs, at
+which time the GDB stub will await a serial port connection and display this
+message in the console:
 
 ```plain
 [SVSM] ***********************************
 [SVSM] * Waiting for connection from GDB *
 [SVSM] ***********************************
 ```
+
+A kernel panic does not enter the debugger; it prints the panic message to
+the console, or stores it in the early log buffer if the console lock is
+already held, and terminates the guest. To inspect a panic, enter
+the stub at an earlier explicit breakpoint, or connect before triggering the
+panic and set a breakpoint on the `panic` handler.
 
 Debug breakpoint can be inserted using the `debug_break` function defined in
 [svsm_gdbstub](../../rustdoc/svsm/debug/gdbstub/svsm_gdbstub) module.
